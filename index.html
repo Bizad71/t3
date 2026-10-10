@@ -1,214 +1,123 @@
-<!doctype html>
+```html
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ساعت کاری ماهی</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BIZAD English | یادگیری زبان</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+  <header class="topbar">
+    <div class="logo">BIZAD <span>ENGLISH</span></div>
+    <div class="date" id="today"></div>
+  </header>
 
-<div class="bg-orb orb1"></div>
-<div class="bg-orb orb2"></div>
+  <main class="container">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">YOUR DAILY ENGLISH ROUTINE</p>
+        <h1>هر روز یک قدم<br>به انگلیسی مسلط‌تر شو.</h1>
+        <p class="muted">برنامه روزانه، تمرین هوشمند و مرور لغات</p>
+      </div>
+      <div class="target">
+        <strong id="learnedCount">0</strong>
+        <span>از ۶۰۰ لغت یادگرفته‌شده</span>
+        <div class="progress"><div id="mainProgress"></div></div>
+      </div>
+    </section>
 
-<header>
-    <div class="sparkle">✦</div>
-    <h1>ساعت کاری ماهی</h1>
-    <p>ثبت ورود و خروج • گزارش هوشمند • آمار ساعات کاری</p>
-</header>
+    <section class="stats">
+      <article class="stat">
+        <span>لغات امروز</span>
+        <strong id="todayCount">0 / 15</strong>
+      </article>
+      <article class="stat">
+        <span>روزهای فعالیت</span>
+        <strong id="streak">0</strong>
+      </article>
+      <article class="stat">
+        <span>درصد پیشرفت</span>
+        <strong id="percent">0%</strong>
+      </article>
+    </section>
 
-<main>
+    <nav class="tabs">
+      <button class="tab active" data-page="lesson">درس امروز</button>
+      <button class="tab" data-page="review">مرور لغات</button>
+      <button class="tab" data-page="quiz">آزمون</button>
+      <button class="tab" data-page="vocabulary">همه لغات</button>
+    </nav>
 
-<section class="card form-card">
-
-    <h2>ثبت ساعت کار</h2>
-
-    <div class="form-grid">
-
-        <div class="field">
-            <label>تاریخ</label>
-            <button type="button" class="date-picker" id="dateBtn">
-                انتخاب تاریخ
-            </button>
+    <section id="lesson" class="page active">
+      <div class="section-head">
+        <div>
+          <h2>درس امروز</h2>
+          <p class="muted">۱۵ لغت جدید؛ هر روز تمرین کن.</p>
         </div>
+        <span class="pill" id="lessonNumber">روز ۱</span>
+      </div>
 
-        <div class="field">
-            <label>روز هفته</label>
-            <div class="readonly" id="dayDisplay">—</div>
+      <div class="flashcard" id="flashcard">
+        <span class="word-label">ENGLISH WORD</span>
+        <h2 id="word">Learn</h2>
+        <p id="pronunciation">/lɜːrn/</p>
+        <p id="translation" class="translation hidden">یاد گرفتن</p>
+        <p id="example" class="example hidden">I want to learn English.</p>
+        <div class="card-actions">
+          <button id="showAnswer" class="btn secondary">نمایش معنی</button>
+          <button id="speak" class="btn secondary">تلفظ</button>
         </div>
+      </div>
 
-        <div class="field">
-            <label>ساعت ورود</label>
-            <input id="start" type="time">
+      <div class="lesson-controls">
+        <button id="previous" class="btn secondary">قبلی</button>
+        <span id="cardPosition">۱ / ۱۵</span>
+        <button id="next" class="btn primary">بعدی</button>
+      </div>
+
+      <div class="completion">
+        <div>
+          <h3>این لغت را یاد گرفتی؟</h3>
+          <p class="muted">فقط لغاتی را ثبت کن که واقعاً بلدی.</p>
         </div>
+        <button id="markLearned" class="btn success">یاد گرفتم</button>
+      </div>
+    </section>
 
-        <div class="field">
-            <label>ساعت خروج</label>
-            <input id="end" type="time">
-        </div>
+    <section id="review" class="page">
+      <h2>مرور لغات</h2>
+      <p class="muted">لغاتی که قبلاً مطالعه کرده‌ای، دوباره تمرین کن.</p>
+      <div id="reviewList" class="word-list"></div>
+      <button id="reviewAll" class="btn primary">شروع مرور</button>
+    </section>
 
-    </div>
+    <section id="quiz" class="page">
+      <h2>آزمون لغات</h2>
+      <p class="muted">معنی درست کلمه را انتخاب کن.</p>
+      <div class="quiz-card">
+        <span class="word-label">WHAT DOES THIS MEAN?</span>
+        <h2 id="quizWord">Improve</h2>
+        <div id="quizOptions" class="options"></div>
+        <p id="quizFeedback" aria-live="polite"></p>
+        <button id="nextQuiz" class="btn primary">سؤال بعدی</button>
+      </div>
+      <p>امتیاز آزمون: <strong id="quizScore">۰</strong></p>
+    </section>
 
-    <button id="addBtn">＋ ثبت ساعت کاری</button>
-    <button id="pdfBtn" class="pdf">▣ ذخیره گزارش PDF</button>
+    <section id="vocabulary" class="page">
+      <h2>فهرست لغات</h2>
+      <input id="searchWord" type="search" placeholder="جست‌وجوی لغت انگلیسی یا معنی فارسی...">
+      <div id="vocabularyList" class="word-list"></div>
+    </section>
 
-</section>
+    <footer>
+      <p>BIZAD ENGLISH — Learn a little every day.</p>
+      <button id="resetProgress" class="text-button">پاک کردن تمام پیشرفت‌ها</button>
+    </footer>
+  </main>
 
-
-<section class="stats">
-
-    <div class="stat">
-        <span>امروز</span>
-        <strong id="todayHours">۰</strong>
-        <small>ساعت</small>
-    </div>
-
-    <div class="stat">
-        <span>این ماه</span>
-        <strong id="monthHours">۰</strong>
-        <small>ساعت</small>
-    </div>
-
-    <div class="stat">
-        <span>روزهای کاری</span>
-        <strong id="workDays">۰</strong>
-        <small>روز</small>
-    </div>
-
-    <div class="stat">
-        <span>میانگین روزانه</span>
-        <strong id="avgHours">۰</strong>
-        <small>ساعت</small>
-    </div>
-
-</section>
-
-
-<section class="charts">
-
-    <div class="card chart-card">
-        <h2>روند ساعت کاری</h2>
-        <canvas id="barChart"></canvas>
-    </div>
-
-    <div class="card chart-card">
-
-        <h2>وضعیت این ماه</h2>
-
-        <div class="donut-wrap">
-            <canvas id="donutChart"></canvas>
-            <div id="donutText">۰٪</div>
-        </div>
-
-        <div class="legend">
-            <span>
-                <i class="dot worked"></i>
-                کارکرد
-            </span>
-
-            <span>
-                <i class="dot remaining"></i>
-                باقی‌مانده
-            </span>
-        </div>
-
-    </div>
-
-</section>
-
-
-<section class="card records">
-
-    <div class="records-head">
-        <h2>گزارش ثبت‌ها</h2>
-        <button id="clearBtn" class="danger">
-            پاک کردن همه
-        </button>
-    </div>
-
-    <div class="table-wrap">
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>تاریخ</th>
-                    <th>روز</th>
-                    <th>ورود</th>
-                    <th>خروج</th>
-                    <th>مدت کار</th>
-                    <th></th>
-                </tr>
-            </thead>
-
-            <tbody id="rows"></tbody>
-
-        </table>
-
-    </div>
-
-    <div id="empty">
-        هنوز ساعتی ثبت نشده است.
-    </div>
-
-</section>
-
-</main>
-
-
-<!-- تقویم شمسی -->
-
-<div class="modal" id="calendarModal">
-
-    <div class="calendar">
-
-        <div class="cal-head">
-
-            <button type="button" id="prevMonth">‹</button>
-
-            <div>
-                <b id="monthName"></b>
-                <small id="yearName"></small>
-            </div>
-
-            <button type="button" id="nextMonth">›</button>
-
-        </div>
-
-
-        <div class="weekdays">
-            <span>ش</span>
-            <span>ی</span>
-            <span>د</span>
-            <span>س</span>
-            <span>چ</span>
-            <span>پ</span>
-            <span>ج</span>
-        </div>
-
-
-        <div class="days" id="days"></div>
-
-
-        <div class="cal-bottom">
-
-            <button type="button" id="todayBtn">
-                امروز
-            </button>
-
-            <button type="button" id="closeCal" class="close">
-                بستن
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script src="script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
+```
