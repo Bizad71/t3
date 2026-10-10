@@ -77,15 +77,23 @@ function speak(text) {
 
 async function translateToPersian(text) {
   if (!text || !text.trim()) return 'ترجمه‌ای در دسترس نیست.';
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text.slice(0, 450))}&langpair=en%7Cfa`;
+  const query = text.trim().slice(0, 450);
+  // Try Google's public translation endpoint first, then MyMemory as a fallback.
+  const googleUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=fa&dt=t&q=${encodeURIComponent(query)}`;
   try {
-    const data = await fetchJson(url, 9000);
+    const data = await fetchJson(googleUrl, 10000);
+    const translated = Array.isArray(data?.[0]) ? data[0].map(part => part?.[0] || '').join('') : '';
+    if (translated.trim()) return translated.trim();
+  } catch (_) { /* Try the second public endpoint. */ }
+  const memoryUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(query)}&langpair=en%7Cfa`;
+  try {
+    const data = await fetchJson(memoryUrl, 10000);
     const translated = data?.responseData?.translatedText;
-    if (typeof translated === 'string' && translated.trim() && data?.responseStatus === 200) {
+    if (typeof translated === 'string' && translated.trim() && Number(data?.responseStatus) === 200) {
       return decodeHtml(translated.trim());
     }
-  } catch (_) { /* Use a friendly fallback below. */ }
-  return 'ترجمه آنلاین فعلاً در دسترس نیست؛ کمی بعد دوباره امتحان کن.';
+  } catch (_) { /* Show an explicit error below. */ }
+  return 'ترجمه فارسی فعلاً از سرویس‌های آنلاین دریافت نشد. اینترنت را بررسی کن و دوباره GO را بزن.';
 }
 
 function decodeHtml(text) {
@@ -127,9 +135,18 @@ function fallbackSentence(word, count) {
 function chooseSentence(examples, word) {
   const key = word.toLowerCase();
   const offset = exampleOffset.get(key) || 0;
-  const validExamples = examples.filter(example => typeof example === 'string' && example.trim().length > 3 && example.length < 220);
-  let sentence = validExamples.length ? validExamples[offset % validExamples.length] : fallbackSentence(word, offset);
-  if (sentence === lastSentence) sentence = validExamples.length > 1 ? validExamples[(offset + 1) % validExamples.length] : fallbackSentence(word, offset + 1);
+  const hasTarget = (sentence) => new RegExp(`(^|[^A-Za-z])${escapeRegExp(word)}(?=$|[^A-Za-z])`, 'i').test(sentence);
+  const validExamples = examples.filter(example =>
+    typeof example === 'string' && example.trim().length > 3 && example.length < 220 && hasTarget(example)
+  );
+  let sentence = validExamples.length
+    ? validExamples[offset % validExamples.length]
+    : fallbackSentence(word, offset);
+  if (sentence === lastSentence) {
+    sentence = validExamples.length > 1
+      ? validExamples[(offset + 1) % validExamples.length]
+      : fallbackSentence(word, offset + 1);
+  }
   exampleOffset.set(key, offset + 1);
   lastSentence = sentence;
   return sentence;
@@ -144,15 +161,19 @@ async function findImage(word, thisRequest) {
   placeholder.textContent = 'در حال جست‌وجوی عکس…';
   wrap.append(placeholder);
   try {
-    const query = `filetype:bitmap ${word}`;
-    const api = new URL('https://commons.wikimedia.org/w/api.php');
-    api.search = new URLSearchParams({ action: 'query', generator: 'search', gsrsearch: query, gsrnamespace: '6', gsrlimit: '12', prop: 'imageinfo', iiprop: 'url|extmetadata', iiurlwidth: '1000', format: 'json', origin: '*' }).toString();
-    const data = await fetchJson(api.toString(), 12000);
+    const query = `${word} filetype:bitmap`;
+    const params = new URLSearchParams({
+      action: 'query', generator: 'search', gsrsearch: query, gsrnamespace: '6',
+      gsrlimit: '30', prop: 'imageinfo', iiprop: 'url|extmetadata',
+      iiurlwidth: '1000', format: 'json', origin: '*'
+    });
+    const data = await fetchJson(`https://commons.wikimedia.org/w/api.php?${params.toString()}`, 15000);
     if (thisRequest !== requestNumber) return;
     const pages = Object.values(data?.query?.pages || {}).filter(page => {
       const info = page.imageinfo?.[0];
       const url = info?.thumburl || info?.url || '';
-      return /\.(jpg|jpeg|png|webp)(\?|$)/i.test(url) && !/\.svg(\?|$)/i.test(url);
+      const title = page.title || '';
+      return /^https:\/\//i.test(url) && /\.(jpg|jpeg|png|webp|gif|tif|tiff)(?:$|[?#])/i.test(title) && !/\.svg(?:$|[?#])/i.test(title);
     });
     if (!pages.length) throw new Error('No images');
     const page = pages[Math.floor(Math.random() * Math.min(pages.length, 8))];
