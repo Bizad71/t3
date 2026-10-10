@@ -1,282 +1,60 @@
-const words = [
-  {en:"Learn",fa:"یاد گرفتن",pron:"lɜːrn",ex:"I want to learn English."},
-  {en:"Improve",fa:"بهتر کردن",pron:"ɪmˈpruːv",ex:"I want to improve my English."},
-  {en:"Understand",fa:"فهمیدن",pron:"ˌʌndərˈstænd",ex:"I understand the question."},
-  {en:"Remember",fa:"به خاطر سپردن",pron:"rɪˈmembər",ex:"Remember this word."},
-  {en:"Forget",fa:"فراموش کردن",pron:"fərˈɡet",ex:"Do not forget your keys."},
-  {en:"Believe",fa:"باور داشتن",pron:"bɪˈliːv",ex:"I believe you."},
-  {en:"Choose",fa:"انتخاب کردن",pron:"tʃuːz",ex:"Choose the best answer."},
-  {en:"Decide",fa:"تصمیم گرفتن",pron:"dɪˈsaɪd",ex:"I need to decide today."},
-  {en:"Explain",fa:"توضیح دادن",pron:"ɪkˈspleɪn",ex:"Can you explain this?" },
-  {en:"Continue",fa:"ادامه دادن",pron:"kənˈtɪnjuː",ex:"Please continue reading."},
-  {en:"Achieve",fa:"دست یافتن",pron:"əˈtʃiːv",ex:"You can achieve your goals."},
-  {en:"Practice",fa:"تمرین کردن",pron:"ˈpræktɪs",ex:"I practice English every day."},
-  {en:"Usually",fa:"معمولاً",pron:"ˈjuːʒuəli",ex:"I usually wake up early."},
-  {en:"Sometimes",fa:"گاهی اوقات",pron:"ˈsʌmtaɪmz",ex:"Sometimes I walk to work."},
-  {en:"Important",fa:"مهم",pron:"ɪmˈpɔːrtənt",ex:"English is important to me."},
-  {en:"Available",fa:"در دسترس",pron:"əˈveɪləbl",ex:"Is this room available?"},
-  {en:"Comfortable",fa:"راحت",pron:"ˈkʌmftərbl",ex:"This chair is comfortable."},
-  {en:"Necessary",fa:"ضروری",pron:"ˈnesəseri",ex:"Practice is necessary."},
-  {en:"Opportunity",fa:"فرصت",pron:"ˌɑːpərˈtuːnəti",ex:"This is a good opportunity."},
-  {en:"Experience",fa:"تجربه",pron:"ɪkˈspɪriəns",ex:"I have work experience."},
-  {en:"Although",fa:"اگرچه",pron:"ɔːlˈðoʊ",ex:"Although it was late, I studied."},
-  {en:"Instead",fa:"به جای آن",pron:"ɪnˈsted",ex:"Drink water instead."},
-  {en:"Perhaps",fa:"شاید",pron:"pərˈhæps",ex:"Perhaps he is busy."},
-  {en:"Enough",fa:"کافی",pron:"ɪˈnʌf",ex:"We have enough time."},
-  {en:"Improve",fa:"بهبود دادن",pron:"ɪmˈpruːv",ex:"Practice can improve your skills."},
-  {en:"Arrive",fa:"رسیدن",pron:"əˈraɪv",ex:"I arrive at work at eight."},
-  {en:"Borrow",fa:"قرض گرفتن",pron:"ˈbɑːroʊ",ex:"Can I borrow your pen?"},
-  {en:"Return",fa:"برگرداندن",pron:"rɪˈtɜːrn",ex:"Please return the book."},
-  {en:"Suggest",fa:"پیشنهاد دادن",pron:"səˈdʒest",ex:"What do you suggest?"},
-  {en:"Require",fa:"نیاز داشتن",pron:"rɪˈkwaɪər",ex:"This job requires experience."}
-];
-
-const DAILY_GOAL = 15;
-const STORAGE_KEY = "bizadEnglishProgressV1";
-
-let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-state.learned ||= [];
-state.completedDays ||= [];
-state.quizScore ||= 0;
-state.dayStart ||= new Date().toDateString();
-
-let currentIndex = 0;
-let quizCurrent = null;
-let quizAnswered = false;
-let reviewMode = false;
-let reviewIndex = 0;
-
-const $ = id => document.getElementById(id);
-
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  updateStats();
+:root {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --panel: #121c30;
+  --panel-2: #17243b;
+  --line: rgba(160, 185, 230, .16);
+  --text: #f4f7ff;
+  --muted: #9eacc6;
+  --blue: #5ba7ff;
+  --cyan: #61e6dc;
+  --highlight: #ffd166;
 }
-
-function getDayNumber() {
-  const start = new Date(state.dayStart);
-  const today = new Date();
-  return Math.max(1, Math.floor((today - start) / 86400000) + 1);
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, #172746 0%, var(--bg) 58%);
+  color: var(--text);
+  font-family: Tahoma, Arial, sans-serif;
+  line-height: 1.75;
 }
-
-function getTodayWords() {
-  const day = getDayNumber();
-  const start = ((day - 1) * DAILY_GOAL) % words.length;
-  return Array.from({length: Math.min(DAILY_GOAL, words.length)}, (_, i) =>
-    (start + i) % words.length
-  );
-}
-
-function updateStats() {
-  const count = state.learned.length;
-  $("learnedCount").textContent = count;
-  $("mainProgress").style.width = Math.min(100, count / 600 * 100) + "%";
-  $("percent").textContent = Math.min(100, Math.round(count / 600 * 100)) + "%";
-  $("todayCount").textContent = `${getTodayWords().filter(i => state.learned.includes(i)).length} / ${DAILY_GOAL}`;
-  $("streak").textContent = state.completedDays.length;
-  $("lessonNumber").textContent = `روز ${getDayNumber()}`;
-}
-
-function activeWords() {
-  return reviewMode ? state.learned : getTodayWords();
-}
-
-function renderCard() {
-  const list = activeWords();
-  if (!list.length) {
-    $("word").textContent = "No words yet";
-    $("translation").textContent = "هنوز لغتی برای مرور ثبت نشده است.";
-    $("translation").classList.remove("hidden");
-    $("pronunciation").textContent = "";
-    $("example").classList.add("hidden");
-    $("cardPosition").textContent = "۰ / ۰";
-    return;
-  }
-
-  currentIndex = Math.max(0, Math.min(currentIndex, list.length - 1));
-  const item = words[list[currentIndex]];
-  $("word").textContent = item.en;
-  $("pronunciation").textContent = `/${item.pron}/`;
-  $("translation").textContent = item.fa;
-  $("example").textContent = item.ex;
-  $("translation").classList.add("hidden");
-  $("example").classList.add("hidden");
-  $("showAnswer").textContent = "نمایش معنی";
-  $("cardPosition").textContent = `${currentIndex + 1} / ${list.length}`;
-  $("markLearned").textContent = state.learned.includes(list[currentIndex])
-    ? "یاد گرفتم ✓" : "یاد گرفتم";
-}
-
-function markLearned() {
-  const list = activeWords();
-  if (!list.length) return;
-  const index = list[currentIndex];
-
-  if (!state.learned.includes(index)) state.learned.push(index);
-
-  const todayList = getTodayWords();
-  if (todayList.every(i => state.learned.includes(i)) &&
-      !state.completedDays.includes(new Date().toDateString())) {
-    state.completedDays.push(new Date().toDateString());
-  }
-
-  save();
-  renderCard();
-  renderVocabulary();
-  renderReview();
-}
-
-function renderVocabulary() {
-  const q = $("searchWord").value.trim().toLowerCase();
-  const found = words.map((w, i) => ({...w, i})).filter(w =>
-    w.en.toLowerCase().includes(q) || w.fa.includes(q)
-  );
-
-  $("vocabularyList").innerHTML = found.map(w => `
-    <div class="word-row">
-      <div>
-        <strong>${escapeHTML(w.en)}</strong>
-        <small>${escapeHTML(w.fa)}</small>
-      </div>
-      <span class="${state.learned.includes(w.i) ? "known" : "muted"}">
-        ${state.learned.includes(w.i) ? "یاد گرفته‌شده" : "جدید"}
-      </span>
-    </div>
-  `).join("") || "<p>لغتی پیدا نشد.</p>";
-}
-
-function renderReview() {
-  const list = state.learned;
-  $("reviewList").innerHTML = list.length ? list.map(i => `
-    <div class="word-row">
-      <div><strong>${escapeHTML(words[i].en)}</strong><small>${escapeHTML(words[i].fa)}</small></div>
-      <span class="known">ثبت شده</span>
-    </div>
-  `).join("") : "<p class='muted'>هنوز لغتی را به عنوان یادگرفته‌شده ثبت نکرده‌ای.</p>";
-}
-
-function escapeHTML(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  })[c]);
-}
-
-function nextQuiz() {
-  quizAnswered = false;
-  $("quizFeedback").textContent = "";
-  $("nextQuiz").textContent = "سؤال بعدی";
-
-  const pool = words.map((w, i) => ({...w, i}));
-  quizCurrent = pool[Math.floor(Math.random() * pool.length)];
-  $("quizWord").textContent = quizCurrent.en;
-
-  const distractors = pool.filter(w => w.i !== quizCurrent.i)
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 3);
-  const options = [...distractors, quizCurrent].sort(() => Math.random() - 0.5);
-
-  $("quizOptions").innerHTML = options.map(w => `
-    <button class="option" data-index="${w.i}">${escapeHTML(w.fa)}</button>
-  `).join("");
-
-  $("quizOptions").querySelectorAll(".option").forEach(button => {
-    button.addEventListener("click", () => answerQuiz(Number(button.dataset.index), button));
-  });
-}
-
-function answerQuiz(index, button) {
-  if (quizAnswered) return;
-  quizAnswered = true;
-
-  const buttons = [...$("quizOptions").querySelectorAll(".option")];
-  buttons.forEach(b => {
-    if (Number(b.dataset.index) === quizCurrent.i) b.classList.add("correct");
-    b.disabled = true;
-  });
-
-  if (index === quizCurrent.i) {
-    state.quizScore++;
-    $("quizFeedback").textContent = "درست است.";
-    $("quizScore").textContent = state.quizScore;
-    save();
-  } else {
-    button.classList.add("wrong");
-    $("quizFeedback").textContent = `پاسخ درست: ${quizCurrent.fa}`;
-  }
-
-  $("nextQuiz").textContent = "سؤال بعدی";
-}
-
-document.querySelectorAll(".tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    tab.classList.add("active");
-    $(tab.dataset.page).classList.add("active");
-    if (tab.dataset.page === "review") renderReview();
-    if (tab.dataset.page === "vocabulary") renderVocabulary();
-  });
-});
-
-$("showAnswer").addEventListener("click", () => {
-  $("translation").classList.toggle("hidden");
-  $("example").classList.toggle("hidden");
-  $("showAnswer").textContent = $("translation").classList.contains("hidden")
-    ? "نمایش معنی" : "پنهان کردن معنی";
-});
-
-$("speak").addEventListener("click", () => {
-  if (!("speechSynthesis" in window)) {
-    alert("تلفظ صوتی در این مرورگر پشتیبانی نمی‌شود.");
-    return;
-  }
-  const utterance = new SpeechSynthesisUtterance(words[activeWords()[currentIndex]].en);
-  utterance.lang = "en-US";
-  utterance.rate = 0.85;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utterance);
-});
-
-$("previous").addEventListener("click", () => {
-  currentIndex = Math.max(0, currentIndex - 1);
-  renderCard();
-});
-
-$("next").addEventListener("click", () => {
-  const list = activeWords();
-  currentIndex = (currentIndex + 1) % Math.max(1, list.length);
-  renderCard();
-});
-
-$("markLearned").addEventListener("click", markLearned);
-
-$("reviewAll").addEventListener("click", () => {
-  if (!state.learned.length) {
-    alert("ابتدا چند لغت را یادگرفته‌شده ثبت کن.");
-    return;
-  }
-  reviewMode = true;
-  currentIndex = 0;
-  document.querySelector('[data-page="lesson"]').click();
-  renderCard();
-});
-
-$("searchWord").addEventListener("input", renderVocabulary);
-$("nextQuiz").addEventListener("click", nextQuiz);
-
-$("resetProgress").addEventListener("click", () => {
-  if (confirm("تمام پیشرفت، امتیاز و لغات ثبت‌شده پاک شوند؟")) {
-    localStorage.removeItem(STORAGE_KEY);
-    location.reload();
-  }
-});
-
-$("today").textContent = new Intl.DateTimeFormat("fa-IR", {
-  year:"numeric", month:"long", day:"numeric"
-}).format(new Date());
-
-renderCard();
-renderVocabulary();
-renderReview();
-updateStats();
-nextQuiz();
+button, input { font: inherit; }
+.app { width: min(100% - 28px, 720px); margin: 0 auto; padding: 30px 0 24px; }
+.header { display: flex; align-items: center; justify-content: center; gap: 13px; margin-bottom: 25px; }
+.brand-mark { display: grid; place-items: center; width: 49px; height: 49px; border-radius: 16px; color: #061221; font-size: 27px; font-weight: 900; background: linear-gradient(135deg, var(--cyan), var(--blue)); box-shadow: 0 0 30px #5ba7ff33; }
+.header h1 { margin: 0; font-size: 25px; letter-spacing: .4px; }
+.header p { margin: 0; color: var(--muted); font-size: 13px; }
+.search-card, .result-card { border: 1px solid var(--line); background: rgba(18, 28, 48, .88); border-radius: 23px; box-shadow: 0 18px 55px #0003; }
+.search-card { padding: 21px; }
+.search-card label { display: block; margin-bottom: 10px; font-size: 14px; font-weight: 700; }
+.search-row { display: flex; gap: 9px; direction: ltr; }
+.search-row input { width: 100%; min-width: 0; border: 1px solid #344663; border-radius: 14px; outline: none; background: #0c1526; color: var(--text); padding: 13px 15px; text-align: left; direction: ltr; }
+.search-row input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px #5ba7ff20; }
+.search-row button { flex: 0 0 91px; border: 0; border-radius: 14px; color: #071323; font-weight: 900; background: linear-gradient(135deg, var(--cyan), var(--blue)); cursor: pointer; }
+.search-row button:disabled { opacity: .55; cursor: wait; }
+.hint { margin: 10px 0 0; color: var(--muted); font-size: 12px; }
+.status { min-height: 27px; margin: 13px 4px; color: var(--muted); font-size: 13px; text-align: center; }
+.status.error { color: #ff9caa; }
+.result-card { padding: 22px; animation: appear .3s ease both; }
+.result-card[hidden] { display: none; }
+.section-label { color: var(--cyan); font-size: 12px; font-weight: 800; margin-bottom: 5px; }
+.word-title { margin: 0 0 3px; text-align: left; font-size: clamp(25px, 6vw, 34px); color: var(--text); }
+.persian-text { margin: 0; color: #e3e9f6; font-size: 16px; }
+.separator { height: 1px; background: var(--line); margin: 19px 0; }
+.english-line { margin: 3px 0 16px; text-align: left; font-size: clamp(17px, 4vw, 21px); line-height: 1.9; color: #f4f7ff; overflow-wrap: anywhere; }
+.word-token { cursor: pointer; border-radius: 5px; padding: 0 2px; text-decoration: underline dotted #8da6c8; text-underline-offset: 4px; }
+.word-token:hover, .word-token:focus { background: #5ba7ff24; outline: none; }
+.word-token.target-word { color: var(--highlight); background: #ffd16617; font-weight: 800; }
+.sentence-translation-label { margin-top: 5px; }
+.image-section { margin-top: 22px; }
+.image-area { min-height: 150px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: #0c1526; }
+.image-area img { display: block; width: 100%; max-height: 390px; object-fit: cover; }
+.image-placeholder { padding: 20px; color: var(--muted); text-align: center; font-size: 13px; }
+.image-caption { margin: 5px 2px 0; color: var(--muted); font-size: 11px; direction: ltr; text-align: left; }
+.another-button { width: 100%; margin-top: 20px; padding: 12px; border: 1px solid #4e83bd66; border-radius: 13px; background: #1a3150; color: #eaf4ff; font-weight: 700; cursor: pointer; }
+.another-button:hover { background: #24466f; }
+footer { padding: 22px 0 0; color: #75839d; text-align: center; font-size: 11px; }
+@keyframes appear { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 420px) { .app { width: min(100% - 20px, 720px); padding-top: 21px; } .search-card, .result-card { padding: 16px; border-radius: 19px; } .search-row button { flex-basis: 76px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

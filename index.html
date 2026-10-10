@@ -1,123 +1,57 @@
-```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BIZAD English | یادگیری زبان</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>WordSpark | یادگیری هوشمند انگلیسی</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo">BIZAD <span>ENGLISH</span></div>
-    <div class="date" id="today"></div>
-  </header>
-
-  <main class="container">
-    <section class="hero">
+  <main class="app">
+    <header class="header">
+      <div class="brand-mark" aria-hidden="true">W</div>
       <div>
-        <p class="eyebrow">YOUR DAILY ENGLISH ROUTINE</p>
-        <h1>هر روز یک قدم<br>به انگلیسی مسلط‌تر شو.</h1>
-        <p class="muted">برنامه روزانه، تمرین هوشمند و مرور لغات</p>
+        <h1>WordSpark</h1>
+        <p>هر کلمه، یک تجربه تازه</p>
       </div>
-      <div class="target">
-        <strong id="learnedCount">0</strong>
-        <span>از ۶۰۰ لغت یادگرفته‌شده</span>
-        <div class="progress"><div id="mainProgress"></div></div>
-      </div>
+    </header>
+
+    <section class="search-card" aria-label="جست‌وجوی کلمه">
+      <label for="wordInput">کلمه انگلیسی موردنظرت رو بنویس</label>
+      <form id="wordForm" class="search-row">
+        <input id="wordInput" type="text" placeholder="مثلاً: curious" autocomplete="off" maxlength="80" required>
+        <button id="goButton" type="submit">GO <span aria-hidden="true">➜</span></button>
+      </form>
+      <p class="hint">برای شنیدن تلفظ، روی هر کلمه انگلیسی بزن.</p>
     </section>
 
-    <section class="stats">
-      <article class="stat">
-        <span>لغات امروز</span>
-        <strong id="todayCount">0 / 15</strong>
-      </article>
-      <article class="stat">
-        <span>روزهای فعالیت</span>
-        <strong id="streak">0</strong>
-      </article>
-      <article class="stat">
-        <span>درصد پیشرفت</span>
-        <strong id="percent">0%</strong>
-      </article>
-    </section>
+    <div id="status" class="status" role="status" aria-live="polite">یک کلمه وارد کن و GO رو بزن.</div>
 
-    <nav class="tabs">
-      <button class="tab active" data-page="lesson">درس امروز</button>
-      <button class="tab" data-page="review">مرور لغات</button>
-      <button class="tab" data-page="quiz">آزمون</button>
-      <button class="tab" data-page="vocabulary">همه لغات</button>
-    </nav>
+    <section id="result" class="result-card" hidden>
+      <div class="section-label">معنی کلمه</div>
+      <h2 id="wordTitle" class="word-title" dir="ltr"></h2>
+      <p id="wordMeaning" class="persian-text"></p>
 
-    <section id="lesson" class="page active">
-      <div class="section-head">
-        <div>
-          <h2>درس امروز</h2>
-          <p class="muted">۱۵ لغت جدید؛ هر روز تمرین کن.</p>
+      <div class="separator"></div>
+      <div class="section-label">یک جمله انگلیسی</div>
+      <p id="englishSentence" class="english-line" dir="ltr"></p>
+
+      <div class="section-label sentence-translation-label">معنی جمله</div>
+      <p id="sentenceMeaning" class="persian-text"></p>
+
+      <div class="image-section">
+        <div class="section-label">تصویر مرتبط</div>
+        <div id="imageArea" class="image-area">
+          <p class="image-placeholder">در حال پیدا کردن تصویر مرتبط…</p>
         </div>
-        <span class="pill" id="lessonNumber">روز ۱</span>
+        <p id="imageCaption" class="image-caption"></p>
       </div>
-
-      <div class="flashcard" id="flashcard">
-        <span class="word-label">ENGLISH WORD</span>
-        <h2 id="word">Learn</h2>
-        <p id="pronunciation">/lɜːrn/</p>
-        <p id="translation" class="translation hidden">یاد گرفتن</p>
-        <p id="example" class="example hidden">I want to learn English.</p>
-        <div class="card-actions">
-          <button id="showAnswer" class="btn secondary">نمایش معنی</button>
-          <button id="speak" class="btn secondary">تلفظ</button>
-        </div>
-      </div>
-
-      <div class="lesson-controls">
-        <button id="previous" class="btn secondary">قبلی</button>
-        <span id="cardPosition">۱ / ۱۵</span>
-        <button id="next" class="btn primary">بعدی</button>
-      </div>
-
-      <div class="completion">
-        <div>
-          <h3>این لغت را یاد گرفتی؟</h3>
-          <p class="muted">فقط لغاتی را ثبت کن که واقعاً بلدی.</p>
-        </div>
-        <button id="markLearned" class="btn success">یاد گرفتم</button>
-      </div>
+      <button id="anotherButton" class="another-button" type="button">✨ یک مثال تازه بساز</button>
     </section>
 
-    <section id="review" class="page">
-      <h2>مرور لغات</h2>
-      <p class="muted">لغاتی که قبلاً مطالعه کرده‌ای، دوباره تمرین کن.</p>
-      <div id="reviewList" class="word-list"></div>
-      <button id="reviewAll" class="btn primary">شروع مرور</button>
-    </section>
-
-    <section id="quiz" class="page">
-      <h2>آزمون لغات</h2>
-      <p class="muted">معنی درست کلمه را انتخاب کن.</p>
-      <div class="quiz-card">
-        <span class="word-label">WHAT DOES THIS MEAN?</span>
-        <h2 id="quizWord">Improve</h2>
-        <div id="quizOptions" class="options"></div>
-        <p id="quizFeedback" aria-live="polite"></p>
-        <button id="nextQuiz" class="btn primary">سؤال بعدی</button>
-      </div>
-      <p>امتیاز آزمون: <strong id="quizScore">۰</strong></p>
-    </section>
-
-    <section id="vocabulary" class="page">
-      <h2>فهرست لغات</h2>
-      <input id="searchWord" type="search" placeholder="جست‌وجوی لغت انگلیسی یا معنی فارسی...">
-      <div id="vocabularyList" class="word-list"></div>
-    </section>
-
-    <footer>
-      <p>BIZAD ENGLISH — Learn a little every day.</p>
-      <button id="resetProgress" class="text-button">پاک کردن تمام پیشرفت‌ها</button>
-    </footer>
+    <footer>برای آموزش و تمرین زبان انگلیسی ساخته شده است.</footer>
   </main>
-
   <script src="script.js"></script>
 </body>
 </html>
-```
