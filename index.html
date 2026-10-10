@@ -3,52 +3,54 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07111f">
-  <meta name="description" content="یادگیری واژگان انگلیسی با معنی فارسی، جمله نمونه، تلفظ و عکس مرتبط">
-  <title>WordSpark | یادگیری واژگان</title>
+  <meta name="theme-color" content="#071426">
+  <title>واژه‌یار | یادگیری انگلیسی</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="app">
     <header class="hero">
-      <div class="brand-mark" aria-hidden="true">W</div>
-      <p class="eyebrow">ENGLISH · ONE WORD AT A TIME</p>
-      <h1>Word<span>Spark</span></h1>
-      <p class="subtitle">هر کلمه، یک قدم به انگلیسی روان‌تر</p>
+      <div class="logo" aria-hidden="true">A<span>ب</span></div>
+      <p class="eyebrow">یادگیری واژه به واژه</p>
+      <h1>واژه‌یار</h1>
+      <p class="subtitle">کلمهٔ فارسی را بنویس؛ انگلیسی‌اش را یاد بگیر.</p>
     </header>
 
     <form id="wordForm" class="search" autocomplete="off">
-      <label class="sr-only" for="wordInput">کلمه انگلیسی</label>
-      <input id="wordInput" type="text" maxlength="80" placeholder="یک کلمه انگلیسی بنویس…" required spellcheck="false" dir="auto">
-      <button id="goButton" type="submit">GO <span aria-hidden="true">↗</span></button>
+      <label for="wordInput">کلمهٔ فارسی</label>
+      <div class="search-row">
+        <input id="wordInput" name="word" type="text" placeholder="مثلاً سیب" required maxlength="80" dir="rtl" autocomplete="off">
+        <button id="goButton" type="submit">برو <span aria-hidden="true">←</span></button>
+      </div>
+      <p class="hint">هر بار «برو» را بزنی، جملهٔ تازه‌ای می‌بینی.</p>
     </form>
-    <p class="hint">برای شنیدن تلفظ، روی هر کلمه انگلیسی بزن</p>
-    <div id="status" class="status" role="status" aria-live="polite">کلمه‌ای وارد کن و GO را بزن.</div>
 
-    <section id="result" class="results" hidden>
+    <p id="status" class="status" role="status" aria-live="polite">یک کلمهٔ فارسی وارد کن.</p>
+
+    <section id="result" class="result" hidden>
       <article class="panel meaning-panel">
-        <div class="section-heading"><span class="number">01</span><h2>معنی کلمه</h2><button class="sound-button" id="wordSound" type="button" aria-label="پخش تلفظ کلمه">🔊</button></div>
-        <p id="wordTitle" class="word-title" dir="ltr"></p>
-        <p id="meaning" class="persian-text">—</p>
-        <p id="definition" class="definition" dir="ltr"></p>
+        <p class="section-label">معنی انگلیسی</p>
+        <h2 id="englishMeaning" lang="en" dir="ltr"></h2>
+        <button id="meaningSpeak" class="sound-button" type="button" aria-label="شنیدن تلفظ واژهٔ انگلیسی">🔊 شنیدن تلفظ</button>
       </article>
 
       <article class="panel sentence-panel">
-        <div class="section-heading"><span class="number">02</span><h2>جمله انگلیسی</h2><button class="sound-button" id="sentenceSound" type="button" aria-label="پخش تلفظ جمله">🔊</button></div>
-        <p id="sentence" class="english-sentence" dir="ltr"></p>
-        <div class="translation-divider"></div>
-        <p class="mini-label">معنی جمله</p>
-        <p id="sentenceMeaning" class="persian-text">—</p>
+        <p class="section-label">جملهٔ انگلیسی <span class="mini-note">(برای شنیدن تلفظ، روی هر کلمه بزن)</span></p>
+        <p id="englishSentence" class="english-sentence" lang="en" dir="ltr"></p>
+        <p class="section-label translation-label">ترجمهٔ فارسی</p>
+        <p id="persianSentence" class="persian-sentence" dir="rtl"></p>
       </article>
 
       <article class="panel image-panel">
-        <div class="section-heading"><span class="number">03</span><h2>تصویر مرتبط</h2></div>
-        <div id="imageWrap" class="image-wrap"><div class="image-placeholder">عکس مرتبط در این قسمت نمایش داده می‌شود</div></div>
+        <p class="section-label">تصویر مرتبط با واژه</p>
+        <a id="imageLink" class="image-link" target="_blank" rel="noopener noreferrer" hidden>
+          <img id="wordImage" alt="تصویر مرتبط با واژه" loading="lazy">
+        </a>
         <p id="imageCaption" class="image-caption"></p>
       </article>
-      <p class="disclaimer">معنی و جمله از منابع عمومی دریافت می‌شوند؛ در دسترس بودن و دقت آن‌ها به سرویس‌های بیرونی وابسته است.</p>
+      <p class="credit">ترجمهٔ واژه از سرویس عمومی MyMemory و تصویر از Wikimedia Commons دریافت می‌شود.</p>
     </section>
-    <footer>WordSpark <span>·</span> ساخته‌شده برای یادگیری روزانه</footer>
+    <footer>ساخته‌شده برای اجرا روی GitHub Pages</footer>
   </main>
   <script src="script.js" defer></script>
 </body>
