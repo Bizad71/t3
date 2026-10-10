@@ -1,4 +1,3 @@
-```javascript
 const words = [
   {en:"Learn",fa:"یاد گرفتن",pron:"lɜːrn",ex:"I want to learn English."},
   {en:"Improve",fa:"بهتر کردن",pron:"ɪmˈpruːv",ex:"I want to improve my English."},
@@ -281,4 +280,3 @@ renderVocabulary();
 renderReview();
 updateStats();
 nextQuiz();
-```
