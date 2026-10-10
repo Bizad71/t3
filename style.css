@@ -1,255 +1,284 @@
-```css
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+```javascript
+const words = [
+  {en:"Learn",fa:"یاد گرفتن",pron:"lɜːrn",ex:"I want to learn English."},
+  {en:"Improve",fa:"بهتر کردن",pron:"ɪmˈpruːv",ex:"I want to improve my English."},
+  {en:"Understand",fa:"فهمیدن",pron:"ˌʌndərˈstænd",ex:"I understand the question."},
+  {en:"Remember",fa:"به خاطر سپردن",pron:"rɪˈmembər",ex:"Remember this word."},
+  {en:"Forget",fa:"فراموش کردن",pron:"fərˈɡet",ex:"Do not forget your keys."},
+  {en:"Believe",fa:"باور داشتن",pron:"bɪˈliːv",ex:"I believe you."},
+  {en:"Choose",fa:"انتخاب کردن",pron:"tʃuːz",ex:"Choose the best answer."},
+  {en:"Decide",fa:"تصمیم گرفتن",pron:"dɪˈsaɪd",ex:"I need to decide today."},
+  {en:"Explain",fa:"توضیح دادن",pron:"ɪkˈspleɪn",ex:"Can you explain this?" },
+  {en:"Continue",fa:"ادامه دادن",pron:"kənˈtɪnjuː",ex:"Please continue reading."},
+  {en:"Achieve",fa:"دست یافتن",pron:"əˈtʃiːv",ex:"You can achieve your goals."},
+  {en:"Practice",fa:"تمرین کردن",pron:"ˈpræktɪs",ex:"I practice English every day."},
+  {en:"Usually",fa:"معمولاً",pron:"ˈjuːʒuəli",ex:"I usually wake up early."},
+  {en:"Sometimes",fa:"گاهی اوقات",pron:"ˈsʌmtaɪmz",ex:"Sometimes I walk to work."},
+  {en:"Important",fa:"مهم",pron:"ɪmˈpɔːrtənt",ex:"English is important to me."},
+  {en:"Available",fa:"در دسترس",pron:"əˈveɪləbl",ex:"Is this room available?"},
+  {en:"Comfortable",fa:"راحت",pron:"ˈkʌmftərbl",ex:"This chair is comfortable."},
+  {en:"Necessary",fa:"ضروری",pron:"ˈnesəseri",ex:"Practice is necessary."},
+  {en:"Opportunity",fa:"فرصت",pron:"ˌɑːpərˈtuːnəti",ex:"This is a good opportunity."},
+  {en:"Experience",fa:"تجربه",pron:"ɪkˈspɪriəns",ex:"I have work experience."},
+  {en:"Although",fa:"اگرچه",pron:"ɔːlˈðoʊ",ex:"Although it was late, I studied."},
+  {en:"Instead",fa:"به جای آن",pron:"ɪnˈsted",ex:"Drink water instead."},
+  {en:"Perhaps",fa:"شاید",pron:"pərˈhæps",ex:"Perhaps he is busy."},
+  {en:"Enough",fa:"کافی",pron:"ɪˈnʌf",ex:"We have enough time."},
+  {en:"Improve",fa:"بهبود دادن",pron:"ɪmˈpruːv",ex:"Practice can improve your skills."},
+  {en:"Arrive",fa:"رسیدن",pron:"əˈraɪv",ex:"I arrive at work at eight."},
+  {en:"Borrow",fa:"قرض گرفتن",pron:"ˈbɑːroʊ",ex:"Can I borrow your pen?"},
+  {en:"Return",fa:"برگرداندن",pron:"rɪˈtɜːrn",ex:"Please return the book."},
+  {en:"Suggest",fa:"پیشنهاد دادن",pron:"səˈdʒest",ex:"What do you suggest?"},
+  {en:"Require",fa:"نیاز داشتن",pron:"rɪˈkwaɪər",ex:"This job requires experience."}
+];
 
-:root {
-  --bg: #0a0d14;
-  --panel: #111723;
-  --panel2: #171f2e;
-  --text: #f2f5fc;
-  --muted: #8c9ab0;
-  --blue: #42a5ff;
-  --green: #3de0b0;
-  --border: #263144;
+const DAILY_GOAL = 15;
+const STORAGE_KEY = "bizadEnglishProgressV1";
+
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+state.learned ||= [];
+state.completedDays ||= [];
+state.quizScore ||= 0;
+state.dayStart ||= new Date().toDateString();
+
+let currentIndex = 0;
+let quizCurrent = null;
+let quizAnswered = false;
+let reviewMode = false;
+let reviewIndex = 0;
+
+const $ = id => document.getElementById(id);
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  updateStats();
 }
 
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Vazirmatn', Tahoma, sans-serif;
+function getDayNumber() {
+  const start = new Date(state.dayStart);
+  const today = new Date();
+  return Math.max(1, Math.floor((today - start) / 86400000) + 1);
 }
 
-button, input { font: inherit; }
-button { cursor: pointer; }
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 22px max(5%, calc((100% - 1100px) / 2));
-  border-bottom: 1px solid var(--border);
+function getTodayWords() {
+  const day = getDayNumber();
+  const start = ((day - 1) * DAILY_GOAL) % words.length;
+  return Array.from({length: Math.min(DAILY_GOAL, words.length)}, (_, i) =>
+    (start + i) % words.length
+  );
 }
 
-.logo {
-  direction: ltr;
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: 1px;
+function updateStats() {
+  const count = state.learned.length;
+  $("learnedCount").textContent = count;
+  $("mainProgress").style.width = Math.min(100, count / 600 * 100) + "%";
+  $("percent").textContent = Math.min(100, Math.round(count / 600 * 100)) + "%";
+  $("todayCount").textContent = `${getTodayWords().filter(i => state.learned.includes(i)).length} / ${DAILY_GOAL}`;
+  $("streak").textContent = state.completedDays.length;
+  $("lessonNumber").textContent = `روز ${getDayNumber()}`;
 }
 
-.logo span { color: var(--blue); }
-.date { color: var(--muted); font-size: 13px; }
-
-.container { max-width: 1000px; margin: auto; padding: 30px 20px; }
-
-.hero {
-  background: linear-gradient(120deg, #142740, #17152e);
-  border: 1px solid #293b59;
-  border-radius: 22px;
-  padding: 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 25px;
+function activeWords() {
+  return reviewMode ? state.learned : getTodayWords();
 }
 
-.eyebrow, .word-label {
-  color: var(--blue);
-  font-size: 11px;
-  letter-spacing: 2px;
-  direction: ltr;
+function renderCard() {
+  const list = activeWords();
+  if (!list.length) {
+    $("word").textContent = "No words yet";
+    $("translation").textContent = "هنوز لغتی برای مرور ثبت نشده است.";
+    $("translation").classList.remove("hidden");
+    $("pronunciation").textContent = "";
+    $("example").classList.add("hidden");
+    $("cardPosition").textContent = "۰ / ۰";
+    return;
+  }
+
+  currentIndex = Math.max(0, Math.min(currentIndex, list.length - 1));
+  const item = words[list[currentIndex]];
+  $("word").textContent = item.en;
+  $("pronunciation").textContent = `/${item.pron}/`;
+  $("translation").textContent = item.fa;
+  $("example").textContent = item.ex;
+  $("translation").classList.add("hidden");
+  $("example").classList.add("hidden");
+  $("showAnswer").textContent = "نمایش معنی";
+  $("cardPosition").textContent = `${currentIndex + 1} / ${list.length}`;
+  $("markLearned").textContent = state.learned.includes(list[currentIndex])
+    ? "یاد گرفتم ✓" : "یاد گرفتم";
 }
 
-.hero h1 { font-size: clamp(25px, 4vw, 38px); line-height: 1.7; margin: 12px 0; }
-.muted { color: var(--muted); font-size: 13px; line-height: 1.9; }
+function markLearned() {
+  const list = activeWords();
+  if (!list.length) return;
+  const index = list[currentIndex];
 
-.target { min-width: 210px; }
-.target strong { display: block; font-size: 38px; color: var(--green); }
-.target span { font-size: 12px; color: var(--muted); }
+  if (!state.learned.includes(index)) state.learned.push(index);
 
-.progress {
-  height: 7px;
-  background: #273246;
-  border-radius: 10px;
-  margin-top: 12px;
-  overflow: hidden;
+  const todayList = getTodayWords();
+  if (todayList.every(i => state.learned.includes(i)) &&
+      !state.completedDays.includes(new Date().toDateString())) {
+    state.completedDays.push(new Date().toDateString());
+  }
+
+  save();
+  renderCard();
+  renderVocabulary();
+  renderReview();
 }
 
-.progress div {
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, var(--blue), var(--green));
-  transition: width .3s;
+function renderVocabulary() {
+  const q = $("searchWord").value.trim().toLowerCase();
+  const found = words.map((w, i) => ({...w, i})).filter(w =>
+    w.en.toLowerCase().includes(q) || w.fa.includes(q)
+  );
+
+  $("vocabularyList").innerHTML = found.map(w => `
+    <div class="word-row">
+      <div>
+        <strong>${escapeHTML(w.en)}</strong>
+        <small>${escapeHTML(w.fa)}</small>
+      </div>
+      <span class="${state.learned.includes(w.i) ? "known" : "muted"}">
+        ${state.learned.includes(w.i) ? "یاد گرفته‌شده" : "جدید"}
+      </span>
+    </div>
+  `).join("") || "<p>لغتی پیدا نشد.</p>";
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin: 22px 0;
+function renderReview() {
+  const list = state.learned;
+  $("reviewList").innerHTML = list.length ? list.map(i => `
+    <div class="word-row">
+      <div><strong>${escapeHTML(words[i].en)}</strong><small>${escapeHTML(words[i].fa)}</small></div>
+      <span class="known">ثبت شده</span>
+    </div>
+  `).join("") : "<p class='muted'>هنوز لغتی را به عنوان یادگرفته‌شده ثبت نکرده‌ای.</p>";
 }
 
-.stat, .completion {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  padding: 20px;
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  })[c]);
 }
 
-.stat span { display: block; color: var(--muted); font-size: 12px; }
-.stat strong { display: block; font-size: 25px; margin-top: 8px; }
+function nextQuiz() {
+  quizAnswered = false;
+  $("quizFeedback").textContent = "";
+  $("nextQuiz").textContent = "سؤال بعدی";
 
-.tabs {
-  display: flex;
-  gap: 8px;
-  padding: 7px;
-  background: var(--panel);
-  border-radius: 13px;
-  margin-bottom: 25px;
-  overflow-x: auto;
+  const pool = words.map((w, i) => ({...w, i}));
+  quizCurrent = pool[Math.floor(Math.random() * pool.length)];
+  $("quizWord").textContent = quizCurrent.en;
+
+  const distractors = pool.filter(w => w.i !== quizCurrent.i)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 3);
+  const options = [...distractors, quizCurrent].sort(() => Math.random() - 0.5);
+
+  $("quizOptions").innerHTML = options.map(w => `
+    <button class="option" data-index="${w.i}">${escapeHTML(w.fa)}</button>
+  `).join("");
+
+  $("quizOptions").querySelectorAll(".option").forEach(button => {
+    button.addEventListener("click", () => answerQuiz(Number(button.dataset.index), button));
+  });
 }
 
-.tab {
-  color: var(--muted);
-  background: transparent;
-  border: 0;
-  padding: 12px 18px;
-  border-radius: 9px;
-  white-space: nowrap;
+function answerQuiz(index, button) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const buttons = [...$("quizOptions").querySelectorAll(".option")];
+  buttons.forEach(b => {
+    if (Number(b.dataset.index) === quizCurrent.i) b.classList.add("correct");
+    b.disabled = true;
+  });
+
+  if (index === quizCurrent.i) {
+    state.quizScore++;
+    $("quizFeedback").textContent = "درست است.";
+    $("quizScore").textContent = state.quizScore;
+    save();
+  } else {
+    button.classList.add("wrong");
+    $("quizFeedback").textContent = `پاسخ درست: ${quizCurrent.fa}`;
+  }
+
+  $("nextQuiz").textContent = "سؤال بعدی";
 }
 
-.tab.active { background: #203451; color: white; }
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    tab.classList.add("active");
+    $(tab.dataset.page).classList.add("active");
+    if (tab.dataset.page === "review") renderReview();
+    if (tab.dataset.page === "vocabulary") renderVocabulary();
+  });
+});
 
-.page { display: none; }
-.page.active { display: block; }
+$("showAnswer").addEventListener("click", () => {
+  $("translation").classList.toggle("hidden");
+  $("example").classList.toggle("hidden");
+  $("showAnswer").textContent = $("translation").classList.contains("hidden")
+    ? "نمایش معنی" : "پنهان کردن معنی";
+});
 
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+$("speak").addEventListener("click", () => {
+  if (!("speechSynthesis" in window)) {
+    alert("تلفظ صوتی در این مرورگر پشتیبانی نمی‌شود.");
+    return;
+  }
+  const utterance = new SpeechSynthesisUtterance(words[activeWords()[currentIndex]].en);
+  utterance.lang = "en-US";
+  utterance.rate = 0.85;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utterance);
+});
 
-h2 { font-size: 22px; }
-.pill { color: var(--green); background: #12332f; padding: 7px 13px; border-radius: 20px; font-size: 12px; }
+$("previous").addEventListener("click", () => {
+  currentIndex = Math.max(0, currentIndex - 1);
+  renderCard();
+});
 
-.flashcard, .quiz-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  text-align: center;
-  padding: 38px 20px;
-  margin-top: 20px;
-}
+$("next").addEventListener("click", () => {
+  const list = activeWords();
+  currentIndex = (currentIndex + 1) % Math.max(1, list.length);
+  renderCard();
+});
 
-.flashcard h2, .quiz-card h2 {
-  font-size: clamp(32px, 6vw, 48px);
-  direction: ltr;
-  margin: 15px 0 5px;
-}
+$("markLearned").addEventListener("click", markLearned);
 
-#pronunciation { color: var(--blue); direction: ltr; }
-.translation { font-size: 22px; color: var(--green); }
-.example { color: var(--muted); direction: ltr; }
-.hidden { display: none; }
+$("reviewAll").addEventListener("click", () => {
+  if (!state.learned.length) {
+    alert("ابتدا چند لغت را یادگرفته‌شده ثبت کن.");
+    return;
+  }
+  reviewMode = true;
+  currentIndex = 0;
+  document.querySelector('[data-page="lesson"]').click();
+  renderCard();
+});
 
-.card-actions, .lesson-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 25px;
-}
+$("searchWord").addEventListener("input", renderVocabulary);
+$("nextQuiz").addEventListener("click", nextQuiz);
 
-.btn {
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 11px 20px;
-  font-weight: 600;
-  transition: .2s;
-}
+$("resetProgress").addEventListener("click", () => {
+  if (confirm("تمام پیشرفت، امتیاز و لغات ثبت‌شده پاک شوند؟")) {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+});
 
-.btn:hover { filter: brightness(1.15); }
-.primary { background: var(--blue); color: #07111e; }
-.secondary { background: var(--panel2); border-color: var(--border); color: var(--text); }
-.success { background: var(--green); color: #06231b; }
+$("today").textContent = new Intl.DateTimeFormat("fa-IR", {
+  year:"numeric", month:"long", day:"numeric"
+}).format(new Date());
 
-.completion {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.completion h3 { margin-bottom: 0; font-size: 16px; }
-.completion p { margin-bottom: 0; }
-
-.word-list { display: grid; gap: 10px; margin: 20px 0; }
-
-.word-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 18px;
-}
-
-.word-row strong { direction: ltr; display: block; }
-.word-row small { color: var(--muted); }
-.word-row .known { color: var(--green); font-size: 12px; }
-
-#searchWord {
-  width: 100%;
-  padding: 14px;
-  margin-top: 15px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: white;
-  border-radius: 10px;
-  outline: none;
-}
-
-.options { display: grid; gap: 10px; max-width: 500px; margin: 25px auto; }
-
-.option {
-  padding: 13px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--panel2);
-  color: white;
-}
-
-.option.correct { border-color: var(--green); background: #12332f; }
-.option.wrong { border-color: #ff6868; background: #351d26; }
-
-#quizFeedback { min-height: 25px; }
-
-footer {
-  text-align: center;
-  border-top: 1px solid var(--border);
-  margin-top: 45px;
-  padding: 25px 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.text-button { background: none; border: 0; color: #ff8888; font-size: 12px; }
-
-@media (max-width: 650px) {
-  .hero { flex-direction: column; align-items: stretch; padding: 23px; }
-  .target { min-width: 0; }
-  .stats { gap: 8px; }
-  .stat { padding: 12px 8px; }
-  .stat strong { font-size: 19px; }
-  .stat span { font-size: 11px; }
-  .tabs { gap: 2px; }
-  .tab { padding: 10px; font-size: 12px; }
-  .completion { align-items: flex-start; flex-direction: column; }
-  .card-actions { flex-wrap: wrap; }
-}
+renderCard();
+renderVocabulary();
+renderReview();
+updateStats();
+nextQuiz();
 ```
