@@ -3,55 +3,53 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <title>WordSpark | یادگیری هوشمند انگلیسی</title>
+  <meta name="theme-color" content="#07111f">
+  <meta name="description" content="یادگیری واژگان انگلیسی با معنی فارسی، جمله نمونه، تلفظ و عکس مرتبط">
+  <title>WordSpark | یادگیری واژگان</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="app">
-    <header class="header">
+    <header class="hero">
       <div class="brand-mark" aria-hidden="true">W</div>
-      <div>
-        <h1>WordSpark</h1>
-        <p>هر کلمه، یک تجربه تازه</p>
-      </div>
+      <p class="eyebrow">ENGLISH · ONE WORD AT A TIME</p>
+      <h1>Word<span>Spark</span></h1>
+      <p class="subtitle">هر کلمه، یک قدم به انگلیسی روان‌تر</p>
     </header>
 
-    <section class="search-card" aria-label="جست‌وجوی کلمه">
-      <label for="wordInput">کلمه انگلیسی موردنظرت رو بنویس</label>
-      <form id="wordForm" class="search-row">
-        <input id="wordInput" type="text" placeholder="مثلاً: curious" autocomplete="off" maxlength="80" required>
-        <button id="goButton" type="submit">GO <span aria-hidden="true">➜</span></button>
-      </form>
-      <p class="hint">برای شنیدن تلفظ، روی هر کلمه انگلیسی بزن.</p>
-    </section>
+    <form id="wordForm" class="search" autocomplete="off">
+      <label class="sr-only" for="wordInput">کلمه انگلیسی</label>
+      <input id="wordInput" type="text" maxlength="80" placeholder="یک کلمه انگلیسی بنویس…" required spellcheck="false" dir="auto">
+      <button id="goButton" type="submit">GO <span aria-hidden="true">↗</span></button>
+    </form>
+    <p class="hint">برای شنیدن تلفظ، روی هر کلمه انگلیسی بزن</p>
+    <div id="status" class="status" role="status" aria-live="polite">کلمه‌ای وارد کن و GO را بزن.</div>
 
-    <div id="status" class="status" role="status" aria-live="polite">یک کلمه وارد کن و GO رو بزن.</div>
+    <section id="result" class="results" hidden>
+      <article class="panel meaning-panel">
+        <div class="section-heading"><span class="number">01</span><h2>معنی کلمه</h2><button class="sound-button" id="wordSound" type="button" aria-label="پخش تلفظ کلمه">🔊</button></div>
+        <p id="wordTitle" class="word-title" dir="ltr"></p>
+        <p id="meaning" class="persian-text">—</p>
+        <p id="definition" class="definition" dir="ltr"></p>
+      </article>
 
-    <section id="result" class="result-card" hidden>
-      <div class="section-label">معنی کلمه</div>
-      <h2 id="wordTitle" class="word-title" dir="ltr"></h2>
-      <p id="wordMeaning" class="persian-text"></p>
+      <article class="panel sentence-panel">
+        <div class="section-heading"><span class="number">02</span><h2>جمله انگلیسی</h2><button class="sound-button" id="sentenceSound" type="button" aria-label="پخش تلفظ جمله">🔊</button></div>
+        <p id="sentence" class="english-sentence" dir="ltr"></p>
+        <div class="translation-divider"></div>
+        <p class="mini-label">معنی جمله</p>
+        <p id="sentenceMeaning" class="persian-text">—</p>
+      </article>
 
-      <div class="separator"></div>
-      <div class="section-label">یک جمله انگلیسی</div>
-      <p id="englishSentence" class="english-line" dir="ltr"></p>
-
-      <div class="section-label sentence-translation-label">معنی جمله</div>
-      <p id="sentenceMeaning" class="persian-text"></p>
-
-      <div class="image-section">
-        <div class="section-label">تصویر مرتبط</div>
-        <div id="imageArea" class="image-area">
-          <p class="image-placeholder">در حال پیدا کردن تصویر مرتبط…</p>
-        </div>
+      <article class="panel image-panel">
+        <div class="section-heading"><span class="number">03</span><h2>تصویر مرتبط</h2></div>
+        <div id="imageWrap" class="image-wrap"><div class="image-placeholder">عکس مرتبط در این قسمت نمایش داده می‌شود</div></div>
         <p id="imageCaption" class="image-caption"></p>
-      </div>
-      <button id="anotherButton" class="another-button" type="button">✨ یک مثال تازه بساز</button>
+      </article>
+      <p class="disclaimer">معنی و جمله از منابع عمومی دریافت می‌شوند؛ در دسترس بودن و دقت آن‌ها به سرویس‌های بیرونی وابسته است.</p>
     </section>
-
-    <footer>برای آموزش و تمرین زبان انگلیسی ساخته شده است.</footer>
+    <footer>WordSpark <span>·</span> ساخته‌شده برای یادگیری روزانه</footer>
   </main>
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>

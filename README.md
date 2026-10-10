@@ -1,57 +1,35 @@
-# WordSpark — دیکشنری هوشمند انگلیسی
+# WordSpark — GitHub Pages only
 
-سایت موبایل‌پسند برای نمایش معنی فارسی کلمه، ساختن جمله انگلیسی تازه با ترجمه فارسی، تلفظ با کلیک روی هر کلمه و نمایش یک تصویر مرتبط از اینترنت.
+A lightweight, mobile-friendly English vocabulary helper. The website itself is static and can be hosted on GitHub Pages. No build step, backend, account, or API key is required.
 
-## فایل‌ها
-- `index.html` — ساختار صفحه
-- `style.css` — ظاهر سایت
-- `script.js` — تعاملات و جست‌وجوی تصویر
-- `worker.js` — واسط امن هوش مصنوعی (Cloudflare Worker)
+## Publish on GitHub Pages
 
-## چرا فقط GitHub Pages کافی نیست؟
-کلید هوش مصنوعی نباید داخل فایل‌های عمومی GitHub قرار بگیرد؛ هر کسی می‌تواند آن را ببیند و مصرف کند. بنابراین صفحه روی GitHub Pages میزبانی می‌شود و `worker.js` روی Cloudflare اجرا می‌شود. کلید Gemini فقط به‌صورت Secret در Cloudflare ذخیره می‌شود.
+1. Create a public GitHub repository, for example `wordspark`.
+2. Upload `index.html`, `style.css`, `script.js`, and `README.md` to the repository's root folder.
+3. Open **Settings → Pages**.
+4. Under **Build and deployment**, choose **Deploy from a branch**.
+5. Choose branch `main`, folder `/ (root)`, then press **Save**.
+6. Wait for GitHub Pages to publish the site. The URL will look like `https://YOUR-USERNAME.github.io/wordspark/`.
 
-## راه‌اندازی
+## Features
 
-### ۱) دریافت کلید Gemini
-1. وارد Google AI Studio شو: https://aistudio.google.com/apikey
-2. یک API key بساز.
-3. این کلید را داخل `script.js` یا GitHub قرار نده.
+- English dictionary definitions from dictionaryapi.dev.
+- Persian translation from MyMemory's public translation endpoint.
+- Click-to-pronounce English words using the browser's speech synthesis.
+- Related image search through Wikimedia Commons; the page displays the image itself.
+- Sentence examples from dictionary data where available, with varied practice sentences as a fallback.
+- Responsive RTL design.
 
-استفاده از API ممکن است محدودیت رایگان، سهمیه یا هزینه داشته باشد؛ شرایط جاری حساب خودت را بررسی کن.
+## Important limits
 
-### ۲) ساخت Worker در Cloudflare
-1. وارد https://dash.cloudflare.com/ شو و از بخش **Workers & Pages** یک Worker جدید بساز.
-2. محتوای کامل فایل `worker.js` را در ویرایشگر Worker جایگزین کن و Deploy بزن.
-3. در تنظیمات Worker، بخش **Settings → Variables and Secrets** (ممکن است نام منو کمی فرق کند) یک Secret بساز:
-   - Name: `GEMINI_API_KEY`
-   - Value: کلید Gemini مرحله ۱
-4. ذخیره کن و دوباره Deploy کن.
-5. کپی کن آدرس Worker که شبیه `https://نام-دلخواه.نام-حساب.workers.dev` است.
+- GitHub Pages is static hosting. It cannot run a private AI model or hide API secrets. This project intentionally uses public endpoints and does not include an AI API key.
+- Sentence examples are not guaranteed to be AI-generated or semantically tailored to every word. When the dictionary has no example, the site uses a practice sentence that contains the word.
+- Meaning translation and images depend on third-party public services, internet access, and their current availability/rate limits. No static website can guarantee those services will never fail.
+- The image is fetched from Wikimedia Commons; licensing and attribution details are provided by the image's source page/metadata where available. This version shows the image title but does not claim every image is public domain.
+- Browser speech synthesis depends on the device/browser's available English voices.
 
-### ۳) اتصال سایت به Worker
-در `script.js` خط اول تنظیمات، این مقدار را پیدا کن:
+## Files
 
-```js
-const API_ENDPOINT = "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
-```
-
-آدرس واقعی Worker خودت را جایگزین متن داخل کوتیشن کن. فایل را ذخیره کن.
-
-### ۴) انتشار روی GitHub Pages
-1. یک repository جدید در GitHub بساز.
-2. چهار فایل این پروژه (`index.html`, `style.css`, `script.js`, `worker.js`) و این README را آپلود کن.
-3. از **Settings → Pages**، گزینه انتشار از شاخه `main` و پوشه `/ (root)` را انتخاب کن.
-4. پس از آماده شدن، سایت از آدرس GitHub Pages نمایش داده می‌شود.
-
-## امکانات
-- هر بار فشردن GO درخواست تازه‌ای به هوش مصنوعی می‌فرستد تا مثال جدیدی بسازد.
-- رنگ کلمه هدف در جمله انگلیسی متفاوت است.
-- با لمس هر واژه انگلیسی، تلفظ آن با صدای مرورگر پخش می‌شود؛ کیفیت و صدای در دسترس به گوشی/مرورگر بستگی دارد.
-- تصویر با جست‌وجوی Wikimedia Commons پیدا می‌شود و فقط خود تصویر داخل سایت نمایش داده می‌شود؛ نام فایل/منبع به شکل متن کوچک پایین تصویر می‌آید.
-- سایت به پایگاه داده نیاز ندارد.
-
-## نکته‌های مهم
-- برای کار کردن بخش AI باید Worker و Secret را تنظیم کنی؛ صرف آپلود فایل‌ها در GitHub کافی نیست.
-- جست‌وجوی تصویر به اتصال اینترنت و موجود بودن تصویر مناسب در Wikimedia Commons وابسته است.
-- در این نسخه محدودسازی تعداد درخواست‌ها و فهرست مجاز دامنه‌ها اضافه نشده است. اگر سایت عمومی و پربازدید شد، برای جلوگیری از سوءاستفاده، محدودیت درخواست و کنترل مبدأ را در Worker اضافه کن.
+- `index.html` — page structure
+- `style.css` — appearance and responsive layout
+- `script.js` — public API requests, rendering, and speech
